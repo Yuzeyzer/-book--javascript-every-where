@@ -7,27 +7,20 @@ const { ApolloServer } = require('apollo-server-express');
 
 const db = require('./db');
 const models = require('./models');
-const typeDefs = require('./schema')
+const typeDefs = require('./schema');
+const resolvers = require('./resolvers');
 
 db.connect(process.env.DB_HOST);
 
-const resolvers = {
-  Query: {
-    hello: () => 'Hello world!',
-    notes: async () => await models.Note.find(),
-    note: async (parent, args) => models.Note.findById(args.id)
-  },
-  Mutation: {
-    newNote: async (parent, args) => {
-      return await models.Note.create({
-        content: args.content,
-        author: 'Yuzeyzer'
-      });
-    }
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  context: () => {
+    return {
+      models
+    };
   }
-};
-
-const server = new ApolloServer({ typeDefs, resolvers });
+});
 
 const app = express();
 const port = process.env.PORT || 4000;
