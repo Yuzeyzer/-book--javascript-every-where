@@ -3,27 +3,13 @@ require('dotenv').config();
 // index.js
 // This is the main entry point of our application
 const express = require('express');
-const { ApolloServer, gql } = require('apollo-server-express');
+const { ApolloServer } = require('apollo-server-express');
+
 const db = require('./db');
 const models = require('./models');
+const typeDefs = require('./schema')
 
 db.connect(process.env.DB_HOST);
-
-const typeDefs = gql`
-  type Note {
-    id: ID!
-    content: String!
-    author: String!
-  }
-  type Query {
-    hello: String!
-    notes: [Note!]!
-    note(id: ID!): Note!
-  }
-  type Mutation {
-    newNote(content: String!): Note!
-  }
-`;
 
 const resolvers = {
   Query: {
