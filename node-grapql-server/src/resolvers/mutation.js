@@ -54,5 +54,24 @@ module.exports = {
       console.error(err);
       throw new Error('Error creating account');
     }
+  },
+  signIn: async (parent, { username, email, password }, { models }) => {
+    const trimmedEmail = email.trim().toLowerCase();
+
+    const user = await models.User.findOne({
+      $or: [{ username }, { email: trimmedEmail }]
+    });
+
+    if (!user) {
+      throw new AuthenticationError('There is no user with that email or username');
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      throw new AuthenticationError('Invalid credentials');
+    }
+
+    return jwt.sign({ id: user._id }, process.env.JWT_SECRET);
   }
 };
