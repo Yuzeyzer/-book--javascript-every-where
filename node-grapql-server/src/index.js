@@ -1,7 +1,12 @@
+require('dotenv').config();
+
 // index.js
 // This is the main entry point of our application
 const express = require('express');
 const { ApolloServer, gql } = require('apollo-server-express');
+const db = require('./db');
+
+db.connect(process.env.DB_HOST);
 
 let notes = [
   {
