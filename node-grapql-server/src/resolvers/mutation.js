@@ -10,7 +10,7 @@ require('dotenv').config();
 const gravatar = require('../util/gravatar');
 
 module.exports = {
-  newNote: async (parent, { content }, { models,user }) => {
+  newNote: async (parent, { content }, { models, user }) => {
     if (!user) {
       throw new AuthenticationError('You must be signed in to create a Note!');
     }
@@ -20,7 +20,7 @@ module.exports = {
       author: mongoose.Types.ObjectId(user.id)
     });
   },
-  deleteNote: async (parent, { id }, { models,user }) => {
+  deleteNote: async (parent, { id }, { models, user }) => {
     if (!user) {
       throw new AuthenticationError('You must be signed in to delete a Note!');
     }
@@ -28,7 +28,9 @@ module.exports = {
     const note = await models.Note.findById(id);
 
     if (note && String(note.author) !== user.id) {
-      throw new ForbiddenError('You do not have permission to delete this Note!');
+      throw new ForbiddenError(
+        'You do not have permission to delete this Note!'
+      );
     }
 
     try {
@@ -39,7 +41,7 @@ module.exports = {
       return false;
     }
   },
-  updateNote: async (parent, { id, content }, { models,user }) => {
+  updateNote: async (parent, { id, content }, { models, user }) => {
     if (!user) {
       throw new AuthenticationError('You must be signed in to delete a Note!');
     }
@@ -47,7 +49,9 @@ module.exports = {
     const note = await models.Note.findById(id);
 
     if (note && String(note.author) !== user.id) {
-      throw new ForbiddenError('You do not have permission to delete this Note!');
+      throw new ForbiddenError(
+        'You do not have permission to delete this Note!'
+      );
     }
 
     try {
@@ -88,7 +92,9 @@ module.exports = {
     });
 
     if (!user) {
-      throw new AuthenticationError('There is no user with that email or username');
+      throw new AuthenticationError(
+        'There is no user with that email or username'
+      );
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -98,5 +104,34 @@ module.exports = {
     }
 
     return jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+  },
+  toggleFavorite: async (parent, { id }, { models, user }) => {
+    if (!user) {
+      throw new AuthenticationError(
+        'You must be signed in to favorite a Note!'
+      );
+    }
+
+    let noteCheck = await models.Note.findById(id);
+    const hasUser = noteCheck.favoritedBy.indexOf(user.id);
+
+    if (hasUser >= 0) {
+      return await models.Note.findOneAndUpdate(
+        id,
+        {
+          $pull: { favoritedBy: user.id },
+          $inc: { favoriteCount: -1 }
+        },
+        { new: true }
+      );
+    }
+    return await models.Note.findOneAndUpdate(
+      id,
+      {
+        $push: { favoritedBy: user.id },
+        $inc: { favoriteCount: 1 }
+      },
+      { new: true }
+    );
   }
 };

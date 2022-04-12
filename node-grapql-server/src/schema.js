@@ -24,7 +24,6 @@ module.exports = gql`
     user(username: String!): User!
     users: [User!]!
     me: User!
-    toggleFavorite(id: ID!): Note!
   }
   type Mutation {
     newNote(content: String!): Note!
@@ -32,5 +31,6 @@ module.exports = gql`
     deleteNote(id: ID!): Boolean!
     signUp(username: String!, email: String!, password: String!): String!
     signIn(username: String, email: String, password: String!): String!
+    toggleFavorite(id: ID!): Note!
   }
 `;
