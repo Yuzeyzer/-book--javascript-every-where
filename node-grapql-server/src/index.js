@@ -32,8 +32,6 @@ const server = new ApolloServer({
 
     const user = getUser(token);
 
-    console.log(user);
-
     return {
       models,
       user
