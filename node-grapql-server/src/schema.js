@@ -8,6 +8,7 @@ module.exports = gql`
     email: String!
     avatar: String!
     notes: [Note!]!
+    favorites: [Note!]!
   }
   type Note {
     id: ID!
